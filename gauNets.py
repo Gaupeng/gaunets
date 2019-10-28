@@ -2,12 +2,12 @@ import subprocess as sp
 import os
 
 
-class gauNetsError(Exception):
-    # raised if not posix or nt
+class gaunetsError(Exception):
+    # raised from gaunets if exception found
     pass
 
 
-class gn1:
+class gaunets:
 
     def __init__(self):
         self.fnull = open(os.devnull, 'w')
@@ -16,6 +16,7 @@ class gn1:
         self.subnetMask = ''
         self.defaultGateway = ''
         self.publicAddress = ''
+        self.broadcast = ''
         self.getInformation()
 
     def cleanNT(self, dPA, dSM, dDG):
@@ -25,18 +26,23 @@ class gn1:
         if(dPA):
             self.privateAddress = dPA[0].split(": ")[1]
         else:
-            raise gauNetsError("Empty Private Address")
+            raise gaunetsError("Empty Private Address")
         if(dSM):
             self.subnetMask = dSM[0].split(": ")[1]
         else:
-            raise gauNetsError("Empty Subnet Mask")
+            raise gaunetsError("Empty Subnet Mask")
         if(dDG):
             self.defaultGateway = dDG[0].split(": ")[1]
         else:
-            raise gauNetsError("Empty Default Gateway")
+            raise gaunetsError("Empty Default Gateway")
 
     def cleanPOSIX(self, dI):
-        print(dI)
+        dI = dI.stdout.read().decode().splitlines()
+        dISplit = dI[0].split()
+        if(dI):
+            self.privateAddress = dISplit[1]
+            self.subnetMask = dISplit[3]
+            self.broadcast = dISplit[5]
 
     def getInformation(self):
         if self.system == "nt":
@@ -49,10 +55,15 @@ class gn1:
             self.cleanNT(dirtyPrivateAddress,
                          dirtySubnetMask, dirtyDefaultGateway)
         elif self.system == "posix":
-            dirtyInformation = sp.call("ifconfig | grep -w  inet")
+            dirtyInformation = sp.Popen(
+                "ifconfig | grep -w  broadcast", stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
             self.cleanPOSIX(dirtyInformation)
         else:
-            raise gauNetsError("Program could not detect your OS Version.")
+            raise gaunetsError("Program could not detect your OS Version.")
 
     def computerInf(self):
-        return (self.privateAddress, self.subnetMask, self.defaultGateway)
+        print("Private IP Address: ", self.privateAddress)
+        print("Subnet Mask: ", self.subnetMask)
+        print("Default Gateway: ", self.defaultGateway)
+        print("Broadcast IP: ", self.broadcast)
+        return ("\nProgram run successfully.")
