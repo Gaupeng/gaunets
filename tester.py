@@ -1,4 +1,4 @@
-import gauNets as gn
+import gaunets as gn
 
-gnObj = gn.gn1()
+gnObj = gn.gaunets()
 print(gnObj.computerInf())
