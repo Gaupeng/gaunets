@@ -10,7 +10,6 @@ class gaunetsError(Exception):
 class gaunets:
 
     def __init__(self):
-        self.fnull = open(os.devnull, 'w')
         self.system = os.name
         self.privateAddress = ''
         self.subnetMask = ''
@@ -56,7 +55,7 @@ class gaunets:
                          dirtySubnetMask, dirtyDefaultGateway)
         elif self.system == "posix":
             dirtyInformation = sp.Popen(
-                "ifconfig | grep -w  broadcast", stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+                "ifconfig | grep -w 'broadcast\|Bcast'", stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
             self.cleanPOSIX(dirtyInformation)
         else:
             raise gaunetsError("Program could not detect your OS Version.")
