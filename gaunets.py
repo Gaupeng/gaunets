@@ -16,7 +16,10 @@ class gaunets:
         self.defaultGateway = ''
         self.publicAddress = ''
         self.broadcast = ''
+        self.NeighbourIp = ''
+
         self.getInformation()
+        self.getNeighbourInfo()
 
     def cleanNT(self, dPA, dSM, dDG):
         dPA = dPA.stdout.read().decode().splitlines()
@@ -35,13 +38,18 @@ class gaunets:
         else:
             raise gaunetsError("Empty Default Gateway")
 
-    def cleanPOSIX(self, dI):
+    def cleanPOSIX(self, dI, dN):
         dI = dI.stdout.read().decode().splitlines()
         dISplit = dI[0].split()
         if(dI):
             self.privateAddress = dISplit[1]
             self.subnetMask = dISplit[3]
             self.broadcast = dISplit[5]
+        
+        dN = dN.stdout.read().decode()
+        
+        if(dN):
+            self.defaultGateway = dN.split()[2]
 
     def getInformation(self):
         if self.system == "nt":
@@ -56,13 +64,26 @@ class gaunets:
         elif self.system == "posix":
             dirtyInformation = sp.Popen(
                 "ifconfig | grep -w 'broadcast\|Bcast'", stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
-            self.cleanPOSIX(dirtyInformation)
+
+            dirtyDefaultGateway = sp.Popen(
+                "ip route| grep default", stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+            self.cleanPOSIX(dirtyInformation,dirtyDefaultGateway)
+
         else:
             raise gaunetsError("Program could not detect your OS Version.")
+    
+    def getNeighbourInfo(self):
+        if(self.system) == "posix":
+            dirtyNeighbourIp = sp.Popen(
+                "ip neigh show", stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+            dirtyNeighbourIp = dirtyNeighbourIp.stdout.read().decode().splitlines()
+            for lines in dirtyNeighbourIp:
+                self.NeighbourIp = self.NeighbourIp + lines.split()[0] +" "
 
     def computerInf(self):
         print("Private IP Address: ", self.privateAddress)
         print("Subnet Mask: ", self.subnetMask)
         print("Default Gateway: ", self.defaultGateway)
         print("Broadcast IP: ", self.broadcast)
-        return ("\nProgram run successfully.")
+        print("Neighbouring IPs : ", self.NeighbourIp) 
+        return ("\nProgram ran successfully.")
