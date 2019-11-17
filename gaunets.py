@@ -10,14 +10,14 @@ class gaunetsError(Exception):
 class gaunets:
 
     def __init__(self):
-        self.system = os.name
-        self.privateAddress = ''
-        self.subnetMask = ''
-        self.defaultGateway = ''
-        self.publicAddress = ''
-        self.broadcast = ''
-        self.NeighbourIp = ''
-        self.dontExit = 1
+        self.system = os.name # Operating System type; nt - Windows; posix - UNIX
+        self.privateAddress = '' #  System Private IP
+        self.subnetMask = '' #  System Subnet Mask
+        self.defaultGateway = '' #  System Default Gateway
+        self.publicAddress = '' #   TO BE DONE - System Public Address
+        self.broadcast = '' # Broadcast IP Address; TO BE DONE for nt
+        self.NeighbourIp = '' # ip neigh show for UNIX; Windows(?)
+        self.dontExit = 1 # Menu looper variable
 
         self.getInformation()
         self.getNeighbourInfo()
@@ -90,32 +90,32 @@ class gaunets:
         print("Neighbouring IPs: ", self.NeighbourIp)
         return
 
-    def priIP(self):
+    def priIP(self): # Prints System Private IP Address
         print("Private IP Address: ", self.privateAddress)
         return
 
-    def subMask(self):
+    def subMask(self): # Prints Subnet Mask
         print("Subnet Mask: ", self.subnetMask)
         return
 
-    def defGat(self):
+    def defGat(self): # Prints Default Gateway
         print("Default Gateway: ", self.defaultGateway)
         return
 
-    def broadIP(self):
+    def broadIP(self): # Prints Broadcast IP
         print("Broadcast IP: ", self.broadcast)
         return
 
-    def neigh(self):
+    def neigh(self): # ip neigh show on UNIX
         print("Neighbouring IPs: ", self.NeighbourIp)
         return
 
-    def exitMenu(self):
+    def exitMenu(self): # Terminate loop and program
         self.dontExit = 0
         print("Exiting program")
         return
 
-    def printMenu(self):
+    def printMenu(self): # Menu for user to choose key
         print("Choose an option from the below, and enter the key: ")
         print("1: Private IP Address")
         print("2: Subnet Mask")
@@ -126,7 +126,7 @@ class gaunets:
         print("7: Exit")
         return "\n"
 
-    def showMenu(self):
+    def showMenu(self): # Function to map index to function
         dictMenu = {
             1: self.priIP,
             2: self.subMask,
