@@ -48,11 +48,9 @@ class gaunets:
             self.subnetMask = dISplit[3]
             self.broadcast = dISplit[5]
 
-        dN = dN.stdout.read().decode()
-
         if(dN):
-            self.defaultGateway = dN.split()[2]
-
+            self.defaultGateway = dN = dN.stdout.read().decode().split()[3]
+            
     def getInformation(self):
         if self.system == "nt":
             dirtyPrivateAddress = sp.Popen(
@@ -139,6 +137,6 @@ class gaunets:
         while(self.dontExit):
             self.printMenu()
             index = int(input("\nEnter the key: "))
-            dictMenu.get(index, lambda: "Invalid index.")()
+            dictMenu.get(index, lambda: print("Invalid index."))()
             print()
         return ("Program run successfully.")
