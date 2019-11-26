@@ -7,7 +7,7 @@ class gaunetsError(Exception):
     pass
 
 
-class gaunets:
+class gaunets():
 
     def __init__(self):
         self.system = os.name # Operating System type; nt - Windows; posix - UNIX
@@ -18,6 +18,14 @@ class gaunets:
         self.broadcast = '' # Broadcast IP Address; TO BE DONE for nt
         self.NeighbourIp = '' # ip neigh show for UNIX; Windows(?)
         self.dontExit = 1 # Menu looper variable
+        self.ARPMac = ''
+        self.arpInput = ''
+        start = self.privateAddress.split(".")
+        start.pop(-1)
+        start = '.'.join(start)
+        start += "."
+        for i in range(255):
+            sp.Popen("ping -c 1 " + start + str(i), stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)	
 
         self.getInformation()
         self.getNeighbourInfo()
@@ -44,9 +52,9 @@ class gaunets:
         dI = dI.stdout.read().decode().splitlines()
         dISplit = dI[0].split()
         if(dI):
-            self.privateAddress = dISplit[1]
-            self.subnetMask = dISplit[3]
-            self.broadcast = dISplit[5]
+            self.privateAddress = dISplit[1].split(":")[1]
+            self.subnetMask = dISplit[3].split(":")[1]
+            self.broadcast = dISplit[2].split(":")[1]
 
         if(dN):
             self.defaultGateway = dN = dN.stdout.read().decode().split()[3]
@@ -112,6 +120,21 @@ class gaunets:
         self.dontExit = 0
         print("Exiting program")
         return
+    
+    def runARP(self):
+        self.arpInput = input("Enter IP Address to find MAC address for: ")
+        out1 = sp.Popen("ping -c 1 " + self.arpInput, stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        out2 = sp.Popen("arp -n | grep " + self.arpInput, stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        self.ARPMac = out2.stdout.read().decode().split()[2]
+        print("Ethernet address for " + self.arpInput + ": " + self.ARPMac)
+        return
+
+    def revARP(self):
+        inp = input("Enter MAC Address to find IP for: ")
+        out2 = sp.Popen("arp -n | grep " + inp, stdin=sp.PIPE, shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        out2 = out2.stdout.read().decode().split()[0]
+        print("MAC Address for: " + inp + ": " + out2)
+        
 
     def printMenu(self): # Menu for user to choose key
         print("Choose an option from the below, and enter the key: ")
@@ -121,7 +144,9 @@ class gaunets:
         print("4: Broadcast IP Address")
         print("5: Neighbor IPs")
         print("6: All Information")
-        print("7: Exit")
+        print("7: ARP")
+        print("8: Reverse ARP")
+        print("9: Exit")
         return "\n"
 
     def showMenu(self): # Function to map index to function
@@ -132,11 +157,14 @@ class gaunets:
             4: self.broadIP,
             5: self.neigh,
             6: self.allInfo,
-            7: self.exitMenu
+            7: self.runARP,
+            8: self.revARP,
+            9: self.exitMenu
         }
         while(self.dontExit):
             self.printMenu()
             index = int(input("\nEnter the key: "))
-            dictMenu.get(index, lambda: print("Invalid index."))()
+            dictMenu.get(index, lambda: "Invalid index.")()
             print()
         return ("Program run successfully.")
+        
